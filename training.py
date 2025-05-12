@@ -1,6 +1,6 @@
 from transformers import AutoModelForTokenClassification, TrainingArguments, Trainer, AutoTokenizer, DataCollatorForTokenClassification
 import wandb
-from aux import json_to_Dataset
+from auxiliary import json_to_Dataset
 import evaluate
 import numpy as np
 import os

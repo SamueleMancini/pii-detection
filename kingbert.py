@@ -1,5 +1,5 @@
 import torch
-from aux import ensembler
+from auxiliary import ensembler
 import torch.nn as nn
 
 class KingBert(nn.Module):

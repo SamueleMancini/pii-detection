@@ -21,6 +21,7 @@ wheels/
 *.egg
 
 # Virtual Environment
+cubo_env/
 venv/
 env/
 ENV/
@@ -35,10 +36,6 @@ venv.bak/
 *.swp
 *.swo
 .DS_Store
-
-# Jupyter Notebook
-.ipynb_checkpoints
-*.ipynb
 
 # Data files
 *.csv
