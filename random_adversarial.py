@@ -84,7 +84,7 @@ for i in ['train', 'test']:
         if k != "confusion_matrix":
             print(f"{k:>12}: {v:.4f}")
 
-    aux.write_dataset_to_json(dataset, f"./data/distilbert_{i}_adv.json")
+    aux.write_dataset_to_json(dataset, f"./data/distilbert_{i}_adv_random.json")
 
 # 1️⃣ load everything exactly as you did
 model      = AutoModelForTokenClassification.from_pretrained('models/albert1')
@@ -108,4 +108,4 @@ for i in ['train', 'test']:
         if k != "confusion_matrix":
             print(f"{k:>12}: {v:.4f}")
 
-    aux.write_dataset_to_json(dataset, f"./data/albert_{i}_adv.json")
+    aux.write_dataset_to_json(dataset, f"./data/albert_{i}_adv_random.json")
