@@ -7,6 +7,8 @@ import wandb
 import spacy
 import evaluate
 from tqdm import tqdm
+import json
+from datasets import Dataset
 nlp = spacy.load("en_core_web_sm")
 
 all_labels = ['B-STREET',
@@ -61,6 +63,41 @@ label2id = {v: k for k, v in id2label.items()}
 target = [l for l in all_labels if l != "O"]
 seqeval = evaluate.load("seqeval")
 confusion_matrix = evaluate.load("confusion_matrix")
+
+def write_dataset_to_json(dataset: Dataset, filepath: str) -> None:
+    """
+    Write a Hugging Face Dataset to a JSON file in the same format as the input JSON used in `json_to_Dataset`.
+
+    Each entry will contain:
+    - id
+    - tokens
+    - token_ids
+    - bio_labels
+    - source_text
+    - adv_inputs (optional)
+    - adv_tokens (optional)
+    """
+    json_data = []
+
+    for idx, row in enumerate(dataset):
+        entry = {
+            "id": str(idx),  # You can replace this with row["id"] if it exists
+            "tokens": row["tokens"],
+            "token_ids": row["input_ids"],
+            "bio_labels": row["labels"],
+            "source_text": row["source_text"]
+        }
+
+        # Include adversarial fields if present
+        if "adv_inputs" in row:
+            entry["adv_inputs"] = row["adv_inputs"]
+        if "adv_tokens" in row:
+            entry["adv_tokens"] = row["adv_tokens"]
+
+        json_data.append(entry)
+
+    with open(filepath, "w") as f:
+        json.dump(json_data, f, indent=2, ensure_ascii=False)
 
 
 def json_to_Dataset(filepath:str) -> Dataset:
@@ -265,23 +302,3 @@ def ensembler_batch(output1, output2, word_ids1, word_ids2):
         res2.append(new_output2)
 
     return torch.cat(res1, dim=0), torch.cat(res2, dim=0)
-
-def download_distilbert():
-    run = wandb.init()
-    artifact = run.use_artifact('splenderai/<pii_detection>/model-1rbdb33p:v2', type='model')
-    artifact_dir = artifact.download()
-
-def download_distilbert2():
-    run = wandb.init()
-    artifact = run.use_artifact('splenderai/<pii_detection>/model-vv5zcoip:v1', type='model')
-    artifact_dir = artifact.download()
-
-def download_albert():
-    run = wandb.init()
-    artifact = run.use_artifact('splenderai/<pii_detection>/model-ugfz5xla:v2', type='model')
-    artifact_dir = artifact.download()
-
-def download_albert2():
-    run = wandb.init()
-    artifact = run.use_artifact('splenderai/<pii_detection>/model-2eaz8bhc:v1', type='model')
-    artifact_dir = artifact.download()
