@@ -115,9 +115,9 @@ def get_trainer(model_name, run_name, dataset_prefix, batch_size=16, label_smoot
 if __name__ == "__main__":
     configs = [
         ("distilbert-base-uncased", "distilbert", "distilbert1", 16, 0.0),
-        ("distilbert-base-uncased", "distilbert", "distilbert2", 64, 0.2),
+        ("distilbert-base-uncased", "distilbert", "distilbert2", 32, 0.2),
         ("albert-base-v2", "albert", "albert1", 16, 0.0),
-        ("albert-base-v2", "albert", "albert2", 64, 0.2),
+        ("albert-base-v2", "albert", "albert2", 32, 0.2),
     ]
 
     for model_name, dataset_prefix, run_name, batch_size, label_smoothing in configs:
