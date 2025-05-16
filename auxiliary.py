@@ -133,7 +133,7 @@ def json_to_Dataset_adv(filepath:str) -> Dataset:
     """
 
     data = []
-    with open(filepath) as f:
+    with open(filepath, encoding="utf-8") as f:
         data = json.load(f)
 
     ids = []
