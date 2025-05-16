@@ -1,3 +1,5 @@
 cubo_env/
 __pycache__/
 to_share/
+wandb/
+models/
