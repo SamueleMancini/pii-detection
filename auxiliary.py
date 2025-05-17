@@ -170,6 +170,8 @@ def json_to_Dataset_ensemble(filepath:str) -> Dataset:
     distilbert_wordids = []
     albert_attention_masks = []
     distilbert_attention_masks = []
+    distilbert_token_labels = []
+    albert_token_labels = []
     for i in data:
         spacy_labels.append(i['spacy_labels'])
         albert_inputids.append(i['albert_inputids'])
@@ -178,8 +180,14 @@ def json_to_Dataset_ensemble(filepath:str) -> Dataset:
         distilbert_wordids.append(i['distilbert_wordids'])
         albert_attention_masks.append([1 for i in range(len(i['albert_inputids']))])
         distilbert_attention_masks.append([1 for i in range(len(i['distilbert_inputids']))])
+        distilbert_token_labels.append(i['distilbert_toklbl'])
+        albert_token_labels.append(i['albert_toklbl'])
 
-    dataset = Dataset.from_dict({'spacy_labels': spacy_labels, 'albert_inputids': albert_inputids, 'distilbert_inputids': distilbert_inputids, 'albert_wordids': albert_wordids, 'distilbert_wordids':distilbert_wordids, 'albert_attention_masks': albert_attention_masks, 'distilbert_attention_masks':distilbert_attention_masks})
+    dataset = Dataset.from_dict({'spacy_labels': spacy_labels, 'albert_inputids': albert_inputids,
+                                  'distilbert_inputids': distilbert_inputids, 'albert_wordids': albert_wordids,
+                                  'distilbert_wordids':distilbert_wordids, 'albert_attention_masks': albert_attention_masks,
+                                  'distilbert_attention_masks':distilbert_attention_masks,
+                                  'distilbert_token_labels':distilbert_token_labels, 'albert_token_labels':albert_token_labels})
 
     return dataset
 
