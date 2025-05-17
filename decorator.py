@@ -1,52 +1,66 @@
 import torch
 from functools import wraps
+from transformers import AutoTokenizer, AutoModelForTokenClassification
+
+# Import these from your module or define them here
 from auxiliary import inference, label2id
 
-def mask_pii(model, tokenizer, pii_labels=None):
-    
+def mask_pii(model_name="models/distilbert1", pii_labels=None):
+    # Load model and tokenizer once
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    model = AutoModelForTokenClassification.from_pretrained(model_name)
+    model.eval()
+    model.tokenizer = tokenizer
+
+    # Default to all non-'O' labels
     if pii_labels is None:
         pii_labels = [label for label in model.config.id2label.values() if label != 'O']
 
     def decorator(func):
         @wraps(func)
         def wrapper(text, *args, **kwargs):
-            # Tokenize input
             encoded = tokenizer(text, return_tensors="pt", truncation=True)
             input_ids = encoded["input_ids"]
             attention_mask = encoded["attention_mask"]
+            word_ids = encoded.word_ids()
 
-            # Run inference
             _, _, predicted_labels, _ = inference(model, input_ids, attention_mask)
-
-            # Convert tokens to words
             tokens = tokenizer.convert_ids_to_tokens(input_ids[0])
-            words = tokenizer.convert_tokens_to_string(tokens).split()
-            masked_tokens = []
-            word_idx = 0
-            buffer = ""
 
-            # Reconstruct and mask text
-            for token, label in zip(tokens, predicted_labels):
-                if token.startswith("▁") or token.startswith("##"):
-                    if buffer:
-                        if label2id.get(label, -1) in [label2id.get(l, -1) for l in pii_labels]:
-                            masked_tokens.append("[MASK]")
+            words = []
+            current_word_id = None
+            current_tokens = []
+            current_labels = []
+
+            for token, word_id, label in zip(tokens, word_ids, predicted_labels):
+                if word_id is None:
+                    continue
+                if word_id != current_word_id:
+                    if current_tokens:
+                        word_text = tokenizer.convert_tokens_to_string(current_tokens).strip()
+                        if any(label2id.get(l, -1) in [label2id.get(p, -2) for p in pii_labels] for l in current_labels):
+                            words.append("[MASK]")
                         else:
-                            masked_tokens.append(buffer)
-                        buffer = ""
-                buffer += token.replace("▁", "").replace("##", "")
-            if buffer:
-                if label2id.get(label, -1) in [label2id.get(l, -1) for l in pii_labels]:
-                    masked_tokens.append("[MASK]")
+                            words.append(word_text)
+                    current_word_id = word_id
+                    current_tokens = [token]
+                    current_labels = [label]
                 else:
-                    masked_tokens.append(buffer)
+                    current_tokens.append(token)
+                    current_labels.append(label)
 
-            masked_text = " ".join(masked_tokens)
+            if current_tokens:
+                word_text = tokenizer.convert_tokens_to_string(current_tokens).strip()
+                if any(label2id.get(l, -1) in [label2id.get(p, -2) for p in pii_labels] for l in current_labels):
+                    words.append("[MASK]")
+                else:
+                    words.append(word_text)
+
+            masked_text = " ".join(words)
 
             print(f"[Original]: {text}")
             print(f"[Masked]  : {masked_text}")
 
-            # Pass the masked text to the wrapped function
             return func(masked_text, *args, **kwargs)
         return wrapper
     return decorator
