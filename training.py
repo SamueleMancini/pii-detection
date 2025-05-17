@@ -78,7 +78,7 @@ def get_trainer(model_name, run_name, dataset_prefix, batch_size=16, label_smoot
         save_steps=600,
         eval_steps=100,
         logging_steps=10,
-        evaluation_strategy="steps",
+        eval_strategy="steps",
         save_strategy="steps",
         load_best_model_at_end=True,
         push_to_hub=False,
@@ -91,8 +91,8 @@ def get_trainer(model_name, run_name, dataset_prefix, batch_size=16, label_smoot
     )
 
     # Load and clean dataset
-    train_dataset = json_to_Dataset(f"{dataset_prefix}_train.json")
-    eval_dataset = json_to_Dataset(f"{dataset_prefix}_test.json")
+    train_dataset = json_to_Dataset(f"datasets/{dataset_prefix}_train.json")
+    eval_dataset = json_to_Dataset(f"datasets/{dataset_prefix}_val.json")
 
     columns_to_remove = [col for col in train_dataset.column_names if col not in {"input_ids", "labels"}]
     train_dataset = train_dataset.remove_columns(columns_to_remove)
@@ -114,10 +114,10 @@ def get_trainer(model_name, run_name, dataset_prefix, batch_size=16, label_smoot
 # Training configs
 if __name__ == "__main__":
     configs = [
-        ("distilbert-base-uncased", "distilbert", "distilbert1", 16, 0.0),
-        ("distilbert-base-uncased", "distilbert", "distilbert2", 32, 0.2),
-        ("albert-base-v2", "albert", "albert1", 16, 0.0),
-        ("albert-base-v2", "albert", "albert2", 32, 0.2),
+        ("distilbert-base-uncased", "distilbert", "models/distilbert1", 16, 0.0),
+        ("distilbert-base-uncased", "distilbert", "models/distilbert2", 32, 0.2),
+        ("albert-base-v2", "albert", "models/albert1", 16, 0.0),
+        ("albert-base-v2", "albert", "models/albert2", 32, 0.2),
     ]
 
     for model_name, dataset_prefix, run_name, batch_size, label_smoothing in configs:
@@ -130,4 +130,12 @@ if __name__ == "__main__":
         )
         trainer.train(resume_from_checkpoint=False)
         trainer.save_model(output_dir=run_name)
+
+        test_dataset = json_to_Dataset(f"datasets/{dataset_prefix}_test.json")
+        columns_to_remove = [col for col in test_dataset.column_names if col not in {"input_ids", "labels"}]
+        test_dataset = test_dataset.remove_columns(columns_to_remove)
+
+        metrics = trainer.evaluate(test_dataset, metric_key_prefix="test")
+        wandb.log(metrics)
+
         wandb.finish()
