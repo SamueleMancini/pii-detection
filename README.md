@@ -5,7 +5,7 @@
 1. Clone the repository:
 
 ```bash
-git clone [repository-url]
+git clone git@github.com:andreafabbricatore/nlp-project.git
 cd nlp-project
 ```
 
