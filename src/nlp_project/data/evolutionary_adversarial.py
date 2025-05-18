@@ -1,5 +1,4 @@
 import random
-
 # ------------------------------------------------------------------
 # Helper: fitness for ONE mutated sentence  (uses compute_metrics)
 # ------------------------------------------------------------------
@@ -8,8 +7,9 @@ from copy import deepcopy
 import torch
 from tqdm import tqdm
 from transformers import AutoModelForTokenClassification, AutoTokenizer
-from nlp_project.utils import inference, compute_metrics
+
 from nlp_project.data import json_to_Dataset, write_dataset_to_json
+from nlp_project.utils import compute_metrics, inference
 
 
 def fitness_score(model, datum, mutated_ids):

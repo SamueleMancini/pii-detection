@@ -1,9 +1,7 @@
 import torch
 import torch.nn as nn
-from transformers import (
-    AlbertForTokenClassification,
-    DistilBertForTokenClassification,
-)
+from transformers import (AlbertForTokenClassification,
+                          DistilBertForTokenClassification)
 
 from nlp_project.utils import id2label, label2id, n_labels
 

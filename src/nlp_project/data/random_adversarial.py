@@ -3,8 +3,10 @@ import random
 import torch
 from tqdm import tqdm
 from transformers import AutoModelForTokenClassification, AutoTokenizer
-from nlp_project.utils import inference, compute_metrics
+
 from nlp_project.data import json_to_Dataset, write_dataset_to_json
+from nlp_project.utils import compute_metrics, inference
+
 
 # Attack the whole dataset and report new metrics
 # ------------------------------------------------------------------

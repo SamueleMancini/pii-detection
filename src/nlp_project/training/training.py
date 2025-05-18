@@ -3,14 +3,9 @@ import os
 import evaluate
 import numpy as np
 import wandb
-from transformers import (
-    AutoModelForTokenClassification,
-    AutoTokenizer,
-    DataCollatorForTokenClassification,
-    EarlyStoppingCallback,
-    Trainer,
-    TrainingArguments,
-)
+from transformers import (AutoModelForTokenClassification, AutoTokenizer,
+                          DataCollatorForTokenClassification,
+                          EarlyStoppingCallback, Trainer, TrainingArguments)
 
 from nlp_project.data import json_to_Dataset
 from nlp_project.utils import all_labels, id2label, label2id, n_labels
