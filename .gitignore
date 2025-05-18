@@ -6,3 +6,4 @@
 datasets/ensemble_train.json
 datasets/ensemble_test.json
 datasets/ensemble_val.json
+.venv/
