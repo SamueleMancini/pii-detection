@@ -1,5 +1,6 @@
 import evaluate
 import torch
+from datasets import Dataset
 from tqdm import tqdm
 from transformers import AutoModelForTokenClassification
 
@@ -39,53 +40,53 @@ def compute_metrics(predictions: list, labels: list):
         "confusion_matrix": confusion["confusion_matrix"],
     }
 
-def compute_ensemble_metrics(model, data):
+def compute_all_metrics(model: AutoModelForTokenClassification, data: Dataset):
     predictions = []
     labels = []
     for datum in tqdm(data, desc="Inference Progress"):
-        try:
-            logits, prediction, predicted_token_class = ensemble_inference(
-                model,
-                torch.tensor([datum["distilbert_inputids"]]),
-                torch.tensor([datum["albert_inputids"]]),
-                torch.tensor([datum["distilbert_attention_masks"]]),
-                torch.tensor([datum["albert_attention_masks"]]),
-                torch.tensor(
-                    [[-100] + datum["distilbert_wordids"][1:-1] + [-100]]
-                ),
-                torch.tensor(
-                    [[-100] + datum["albert_wordids"][1:-1] + [-100]]
-                ),
-            )
-        except:
-            continue
-        predictions.append(prediction.tolist())
-        labels.append(datum["spacy_labels"])
+        logits, prediction, predicted_token_class, inputs = inference(
+            model,
+            torch.tensor([datum["input_ids"]]),
+            torch.tensor([datum["attention_mask"]]),
+        )
+        predictions.append(prediction.tolist()[0])
+        labels.append(datum["labels"])
 
     return compute_metrics(predictions, labels)
 
-def ensemble_inference(
-    model,
-    distilbert_input_ids,
-    albert_input_ids,
-    distil_attention_mask,
-    alb_attention_mask,
-    distilbert_word_ids,
-    albert_word_ids,
-):
-    with torch.no_grad():
-        logits = model(
-            distilbert_input_ids,
-            albert_input_ids,
-            distil_attention_mask,
-            alb_attention_mask,
-            distilbert_word_ids,
-            albert_word_ids,
-        )
-    predictions = torch.argmax(logits, dim=1)
-    predicted_token_class = [id2label[t.item()] for t in predictions]
+def compute_metrics_ensemble(model, dataset):
+    model.eval()
+    all_preds, all_trues = [], []
 
-    return logits, predictions, predicted_token_class
+    with torch.no_grad():
+        for example in tqdm(dataset, desc="Evaluating"):
+            input_ids_distil = torch.tensor([example["distilbert_inputids"]])
+            attention_mask_distil = torch.tensor([example["distilbert_attention_masks"]])
+            input_ids_albert = torch.tensor([example["albert_inputids"]])
+            attention_mask_albert = torch.tensor([example["albert_attention_masks"]])
+
+            word_ids_distil = [example["distilbert_wordids"]]
+            word_ids_albert = [example["albert_wordids"]]
+            labels = torch.tensor([example["spacy_labels"]])  # ✅ fixed here
+
+            outputs = model(
+                input_ids_distil=input_ids_distil,
+                attention_mask_distil=attention_mask_distil,
+                input_ids_albert=input_ids_albert,
+                attention_mask_albert=attention_mask_albert,
+                distil_word_ids=word_ids_distil,
+                albert_word_ids=word_ids_albert,
+                labels=labels
+            )
+
+            logits = outputs["logits"]  # shape: [1, seq_len, num_labels]
+            preds = torch.argmax(logits, dim=-1).squeeze(0).tolist()
+            all_preds.append(preds)
+            all_trues.append(labels.squeeze(0).tolist())
+
+    metrics = compute_metrics(all_preds, all_trues)
+    return metrics
+
 
 def inference(
     model: AutoModelForTokenClassification,
