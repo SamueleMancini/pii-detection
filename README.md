@@ -40,10 +40,11 @@ nlp-project/
 │       └── pii_decorator/  # Sample PII detection library
 ├── notebooks/              # Jupyter notebooks for development and analysis
 │   ├── inference.ipynb     # Model inference examples
-│   ├── embedding_viz.ipynb # Embedding visualization
-│   └── cubebert.ipynb      # CubeBERT analysis
-├── datasets/              # Dataset storage
-```
+│   └── embedding_viz.ipynb # Embedding visualization
+├── datasets/
+│   └── datasets.txt        # Drive links to datasets
+└── models/
+    └── models.txt          # Drive links to models
 
 ## Authors
 
