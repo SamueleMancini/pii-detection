@@ -146,7 +146,7 @@ if __name__ == "__main__":
             except Exception as e:
                 continue
 
-    # dump(out_distil, "distilbert")
-    # dump(out_albert, "albert")
+    dump(out_distil, "distilbert")
+    dump(out_albert, "albert")
     dump(out_ensemble, "ensemble")
     print("✓ Finished. JSON files in", OUT_DIR)

@@ -1,11 +1,14 @@
 import random
-
+import warnings
 import torch
 from tqdm import tqdm
 from transformers import AutoModelForTokenClassification, AutoTokenizer
+from sklearn.exceptions import UndefinedMetricWarning
 
 from nlp_project.data import json_to_Dataset, write_dataset_to_json
 from nlp_project.utils import compute_metrics, inference
+
+warnings.filterwarnings("ignore", category=UndefinedMetricWarning)
 
 
 # Attack the whole dataset and report new metrics
@@ -69,21 +72,14 @@ def adversarial_dataset(
     return metrics, preds, adv_inputs, dataset
 
 
-import warnings
-
-from sklearn.exceptions import UndefinedMetricWarning
-
-# Suppress only the specific warning from seqeval
-warnings.filterwarnings("ignore", category=UndefinedMetricWarning)
-
-# 1️⃣ load everything exactly as you did
+# load everything
 model = AutoModelForTokenClassification.from_pretrained("models/distilbert1")
 tokenizer = AutoTokenizer.from_pretrained("models/distilbert1")
 
-for i in ["train", "test"]:
+for i in ["train", "val", "test"]:
     ds = json_to_Dataset(f"./data/distilbert_{i}.json")
 
-    # 2️⃣ run the adversarial evolution
+    # run the adversarial evolution
     adv_metrics, adv_preds, adv_inputs, dataset = adversarial_dataset(
         model,
         tokenizer,
@@ -100,14 +96,14 @@ for i in ["train", "test"]:
         dataset, f"./data/distilbert_{i}_adv_random.json"
     )
 
-# 1️⃣ load everything exactly as you did
+# load everything
 model = AutoModelForTokenClassification.from_pretrained("models/albert1")
 tokenizer = AutoTokenizer.from_pretrained("models/albert1")
 
-for i in ["train", "test"]:
+for i in ["train", "val", "test"]:
     ds = json_to_Dataset(f"./data/albert_{i}.json")
 
-    # 2️⃣ run the adversarial evolution
+    # run the adversarial evolution
     adv_metrics, adv_preds, adv_inputs, dataset = adversarial_dataset(
         model,
         tokenizer,

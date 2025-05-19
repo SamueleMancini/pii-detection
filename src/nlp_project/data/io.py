@@ -20,7 +20,7 @@ def write_dataset_to_json(dataset: Dataset, filepath: str) -> None:
 
     for idx, row in enumerate(dataset):
         entry = {
-            "id": str(idx),  # You can replace this with row["id"] if it exists
+            "id": str(idx),
             "tokens": row["tokens"],
             "token_ids": row["input_ids"],
             "bio_labels": row["labels"],
