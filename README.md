@@ -1,5 +1,13 @@
 # NLP Project
 
+This work presents a robust and lightweight framework for detecting PII in real-world LLM prompts. By fine-tuning *ALBERT* and *DistilBERT* models and combining them through word-level ensembling, we improve detection performance and generalization.
+
+Our main contribution is the introduction of adversarial training using evolutionary perturbations, which significantly boosts robustness to noisy or obfuscated inputs. The resulting models achieve over 94\% recall on adversarial test data, showing how iterative implementation of these strengthening methods could be the right pipeline towards more secure systems.
+
+Embedding visualizations confirm that adversarial fine-tuning sharpens token representations, reinforcing the model's ability to distinguish sensitive entities under context shift.
+
+Overall, our results suggest that transformer-based PII detectors—especially when adversarially augmented—offer a scalable and practical solution for privacy protection in LLM deployments.
+
 ## Installation
 
 1. Clone the repository:
